@@ -37,6 +37,12 @@
                 card:riv_corner_radius_top_left="@dimen/card_corner_radius"
                 card:riv_corner_radius_top_right="@dimen/card_corner_radius" />
 
+            <Switch
+                android:text="Switch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/switch1" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

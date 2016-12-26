@@ -1,4 +1,5 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -8,9 +9,11 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="@mipmap/intro"
     tools:context="com.harman.autowaterproject.LoginActivity">
 
     <!-- Login progress -->
+
     <ProgressBar
         android:id="@+id/login_progress"
         style="?android:attr/progressBarStyleLarge"
@@ -19,10 +22,14 @@
         android:layout_marginBottom="8dp"
         android:visibility="gone" />
 
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="350dp" />
+
     <ScrollView
         android:id="@+id/login_form"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="183dp">
 
         <LinearLayout
             android:id="@+id/email_login_form"
@@ -39,7 +46,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/prompt_email"
+                    android:textColorHint="@color/colorWhite"
                     android:inputType="textEmailAddress"
+                    android:textColor="@color/colorWhite"
                     android:maxLines="1"
                     android:singleLine="true" />
 
@@ -50,10 +59,12 @@
                 android:layout_height="wrap_content">
 
                 <EditText
+                    android:textColor="@color/colorWhite"
                     android:id="@+id/password"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/prompt_password"
+                    android:textColorHint="@color/colorWhite"
                     android:imeActionId="@+id/login"
                     android:imeActionLabel="@string/action_sign_in_short"
                     android:imeOptions="actionUnspecified"
@@ -65,11 +76,12 @@
 
             <Button
                 android:id="@+id/email_sign_in_button"
-                style="?android:textAppearanceSmall"
+                android:textColor="@color/colorWhite"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="@string/action_sign_in"
+                android:background="@drawable/nocolor_button_with_borders"
                 android:textStyle="bold" />
 
         </LinearLayout>

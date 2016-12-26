@@ -10,12 +10,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
-
 
 import com.harman.autowaterproject.FlowerItem;
 import com.harman.autowaterproject.R;
 import com.squareup.picasso.Picasso;
+
+import org.eclipse.paho.android.service.MqttAndroidClient;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.util.List;
 
@@ -23,11 +27,14 @@ public class FlowersListAdapter extends RecyclerView.Adapter<FlowersListAdapter.
 {
     private List<FlowerItem> data;
     private List<String> uris;
+    private MqttAndroidClient client;
+    private boolean state = false;
 
-    public FlowersListAdapter(List<FlowerItem> data, List<String> uris)
+    public FlowersListAdapter(List<FlowerItem> data, List<String> uris, MqttAndroidClient _client)
     {
         this.data = data;
         this.uris = uris;
+        this.client = _client;
     }
 
     @Override
@@ -45,6 +52,35 @@ public class FlowersListAdapter extends RecyclerView.Adapter<FlowersListAdapter.
                 .load(uris.get(position))
                 .resize(100,100)
                 .into(holder.imageView);
+
+        holder.testSwitch.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                try
+                {
+                    String tmp = "0";
+                    if (state)
+                    {
+                        state = false;
+                    }
+                    else
+                    {
+                        state = true;
+                        tmp = "1";
+                    }
+                    MqttMessage message = new MqttMessage();
+                    message.setPayload(tmp.getBytes());
+                    client.publish("main_topic", message);
+                }
+                catch (MqttException e)
+                {
+
+                }
+            }
+        });
+
     }
 
     @Override
@@ -58,6 +94,7 @@ public class FlowersListAdapter extends RecyclerView.Adapter<FlowersListAdapter.
         CardView cardView;
         ImageView imageView;
         TextView title;
+        Switch testSwitch;
 
         public FlowerViewHolder (View itemView)
         {
@@ -65,6 +102,7 @@ public class FlowersListAdapter extends RecyclerView.Adapter<FlowersListAdapter.
             cardView = (CardView) itemView.findViewById(R.id.cardView);
             title = (TextView) itemView.findViewById(R.id.title);
             imageView = (ImageView) itemView.findViewById(R.id.cardImage);
+            testSwitch = (Switch) itemView.findViewById(R.id.switch1);
         }
     }
 

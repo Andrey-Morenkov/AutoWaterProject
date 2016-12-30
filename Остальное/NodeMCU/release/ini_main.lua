@@ -19,23 +19,34 @@ local wifi_counter = 0
 -- Create an alarm to poll the wifi.sta.getip() function once a second
 -- If the device hasn't connected yet, blink through the LED colors. If it
 -- has, turn the LED white
-tmr.alarm(0, 1000, 1, function()
-    if wifi.sta.getip() == nil then
-        print("Connecting to AP...\n")
-
-        -- Rotate through RGB colors while waiting
-        wifi_counter = wifi_counter + 1;
+if ((WIFI_SSID == "none") or (WIFI_SSID == "nowifi"))
+    then
+        print("No wifi or not SSID")
+        dofile("StandaloneMode.lua")
     else
-        ip, nm, gw = wifi.sta.getip()
+        tmr.alarm(0, 1000, 1, function()
+        if ((wifi.sta.getip() == nil) and (wifi_counter < 12))
+            then
+                print("Connecting to Router...\n")        
+                wifi_counter = wifi_counter + 1;     
+            else if (wifi_counter < WIFI_WAIT )
+                then
+                    ip, nm, gw = wifi.sta.getip()
 
-        -- Debug info
-        print("\n\nIP Info: \nIP Address: ",ip)
-        print("Netmask: ",nm)
-        print("Gateway Addr: ",gw,'\n')
+                    -- Debug info
+                    print("\n\nIP Info: \nIP Address: ",ip)
+                    print("Netmask: ",nm)
+                    print("Gateway Addr: ",gw,'\n')
+                    tmr.stop(0)     -- Stop the polling loop
 
-        tmr.stop(0)     -- Stop the polling loop
-
-        -- Continue to main function after network connection
-        dofile("CloudEx.lua")
-    end
-end)
+                    -- Continue to main function after network connection
+                    dofile("CloudEx.lua")   
+                else
+                    print('Cant connect to router with given SSID and PASS')
+                    print('Set AP mode, please configure')
+                    tmr.stop(0)
+                    dofile("StandaloneMode.lua")
+            end       
+        end
+    end)
+end

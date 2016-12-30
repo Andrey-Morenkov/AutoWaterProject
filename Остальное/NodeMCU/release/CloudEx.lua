@@ -30,6 +30,6 @@ mqtt:connect("m21.cloudmqtt.com", 19348, 0, function(conn)
   -- subscribe topic with qos = 0
   mqtt:subscribe("main_topic",0)
   print("CloudMQTT connected")
-  dofile("blink.lua")
+  dofile("StationBlink.lua")
 end)
 

@@ -7,6 +7,8 @@ elseif reset_reason == 4 then
     print("Software restart")
 elseif reset_reason == 6 then
     print("Hardware restart")
+    file.remove("WifiConfig.lua")
 end
 
-dofile("ini_main.lua")
+dofile("config.lua")
+dofile("StationMode.lua")

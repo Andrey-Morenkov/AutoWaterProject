@@ -7,6 +7,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 
 import com.harman.autowaterproject.adapter.FlowersListAdapter;
 
@@ -17,9 +19,10 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends AppCompatActivity implements Handler.Callback
 {
     private RecyclerView mRecyclerView;
+    private TextView     mEmptyViewText;
     private RecyclerView.LayoutManager mLayoutManager;
     private FlowersListAdapter mAdapter;
 
@@ -38,7 +41,10 @@ public class MainActivity extends AppCompatActivity
         Log.d(LogPrefix, "< onCreate main >");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //Intent intent1 = getIntent();
+
+        mainHandler = new Handler(this);
+
+        DataModel.getInstance().setContext(this.getApplicationContext());
 
         clientId = MqttClient.generateClientId();
         client = new MqttAndroidClient(this.getApplicationContext(), "tcp://m21.cloudmqtt.com:19348", clientId);
@@ -46,22 +52,28 @@ public class MainActivity extends AppCompatActivity
         options.setUserName("pnuxphmq");
         options.setPassword("74G0GoSMqfDx".toCharArray());
 
-        mainHandler = new Handler()
-        {
-            public void handleMessage(Message msg)
-            {
-                switch (msg.what)
-                {
-                    case MQTTAction:
-                        Log.d(LogPrefix, "<Main Handler> Incoming message about MQTT ");
-                        break;
-                }
-            }
-        };
-
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getBaseContext()));
-        mRecyclerView.setAdapter(new FlowersListAdapter(createTestData(), createTestUris(), client));
+        mRecyclerView.setAdapter(new FlowersListAdapter(DataModel.getInstance().getFlowerList(), createTestUris(), client));
+
+        mEmptyViewText = (TextView) findViewById(R.id.emptyViewText);
+
+        if (DataModel.getInstance().getFlowerList().isEmpty())
+        {
+            mRecyclerView.setVisibility(View.GONE);
+            mEmptyViewText.setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            mRecyclerView.setVisibility(View.VISIBLE);
+            mEmptyViewText.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public boolean handleMessage(Message msg)
+    {
+        return true;
     }
 
     @Override
@@ -69,6 +81,8 @@ public class MainActivity extends AppCompatActivity
     {
         Log.d(LogPrefix, "< onResume main >");
         super.onResume();
+
+
     }
 
     @Override

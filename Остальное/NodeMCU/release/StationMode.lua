@@ -1,6 +1,3 @@
--- Initialize
-dofile("config.lua")
-
 -- Put radio into station mode to connect to network
 wifi.setmode(wifi.STATION)
 
@@ -17,17 +14,28 @@ wifi.sta.config(WIFI_SSID, WIFI_PASS)
 local wifi_counter = 0
 
 -- Create an alarm to poll the wifi.sta.getip() function once a second
--- If the device hasn't connected yet, blink through the LED colors. If it
--- has, turn the LED white
 if ((WIFI_SSID == "none") or (WIFI_SSID == "nowifi"))
     then
         print("No wifi or not SSID")
         dofile("StandaloneMode.lua")
     else
         tmr.alarm(0, 1000, 1, function()
-        if ((wifi.sta.getip() == nil) and (wifi_counter < 12))
+        if ((wifi.sta.getip() == nil) and (wifi_counter < WIFI_WAIT))
             then
-                print("Connecting to Router...\n")        
+                print("Connecting to Router...\n")
+                do
+                    local state = 0
+                    tmr.alarm(1, 100, 1, function()
+                        if state == 0 then
+                            state = 1
+                            gpio.write(0, gpio.LOW)
+                        else
+                            state = 0
+                            tmr.stop(1)
+                            gpio.write(0, gpio.HIGH)
+                        end
+                    end)
+                end
                 wifi_counter = wifi_counter + 1;     
             else if (wifi_counter < WIFI_WAIT )
                 then

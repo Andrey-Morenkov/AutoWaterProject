@@ -13,7 +13,7 @@ import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.harman.autowaterproject.FlowerItem;
+import com.harman.autowaterproject.Flower;
 import com.harman.autowaterproject.R;
 import com.squareup.picasso.Picasso;
 
@@ -21,16 +21,17 @@ import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class FlowersListAdapter extends RecyclerView.Adapter<FlowersListAdapter.FlowerViewHolder>
 {
-    private List<FlowerItem> data;
+    private ArrayList<Flower> data;
     private List<String> uris;
     private MqttAndroidClient client;
     private boolean state = false;
 
-    public FlowersListAdapter(List<FlowerItem> data, List<String> uris, MqttAndroidClient _client)
+    public FlowersListAdapter(ArrayList<Flower> data, List<String> uris, MqttAndroidClient _client)
     {
         this.data = data;
         this.uris = uris;
@@ -47,7 +48,7 @@ public class FlowersListAdapter extends RecyclerView.Adapter<FlowersListAdapter.
     @Override
     public void onBindViewHolder(FlowerViewHolder holder, int position)
     {
-        holder.title.setText(data.get(position).getTitle());
+        holder.title.setText(data.get(position).getName());
         Picasso.with(holder.imageView.getContext())
                 .load(uris.get(position))
                 .resize(100,100)
@@ -72,7 +73,7 @@ public class FlowersListAdapter extends RecyclerView.Adapter<FlowersListAdapter.
                     }
                     MqttMessage message = new MqttMessage();
                     message.setPayload(tmp.getBytes());
-                    client.publish("main_topic", message);
+                    client.publish("toController", message);
                 }
                 catch (MqttException e)
                 {

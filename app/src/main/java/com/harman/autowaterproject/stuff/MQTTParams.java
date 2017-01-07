@@ -13,20 +13,25 @@ public class MQTTParams
 {
     private MqttAndroidClient   mClient;
     private MqttConnectOptions  mOptions;
-    private int                 mHandleTag;
+    private int                 mParentHandleTag;
     private int                 mQuitTag;
     private Handler             mParentHandler;
     private String              mLogPrefix;
+    private String              mSuccessLogin;
+    private String              mFailLogin;
 
 
-    public MQTTParams (MqttAndroidClient _client, MqttConnectOptions _options, int _handletag, int _quittag, Handler _parenthandler, String _logprefix)
+    public MQTTParams (MqttAndroidClient _client, MqttConnectOptions _options, int _parenthandletag, int _quittag,
+                       Handler _parenthandler, String _logprefix, String _successlogin, String _faillogin)
     {
         mClient = _client;
         mOptions = _options;
-        mHandleTag = _handletag;
+        mParentHandleTag = _parenthandletag;
         mParentHandler = _parenthandler;
         mLogPrefix = _logprefix;
         mQuitTag = _quittag;
+        mSuccessLogin = _successlogin;
+        mFailLogin = _faillogin;
     }
 
     public MqttAndroidClient getClient()
@@ -37,9 +42,9 @@ public class MQTTParams
     {
         return mOptions;
     }
-    public int getHandleTag()
+    public int getParentHandleTag()
     {
-        return mHandleTag;
+        return mParentHandleTag;
     }
     public int getQuitTag()
     {
@@ -54,7 +59,15 @@ public class MQTTParams
         return mLogPrefix;
     }
 
+    public String getSuccessLogin()
+    {
+        return mSuccessLogin;
+    }
 
+    public String getFailLogin()
+    {
+        return mFailLogin;
+    }
 
 
     public void setClient (MqttAndroidClient _client)
@@ -65,9 +78,9 @@ public class MQTTParams
     {
         mOptions = _options;
     }
-    public void setHandleTag(int _handletag)
+    public void setParentHandleTag(int _parenthandletag)
     {
-        mHandleTag = _handletag;
+        mParentHandleTag = _parenthandletag;
     }
     public void setQuitTag(int _quittag)
     {
@@ -80,5 +93,13 @@ public class MQTTParams
     public void setLogPrefix(String _logprefix)
     {
         mLogPrefix = _logprefix;
+    }
+    public void setSuccessLogin(String _successlogin)
+    {
+        mSuccessLogin = _successlogin;
+    }
+    public void setFailLogin(String _faillogin)
+    {
+        mFailLogin = _faillogin;
     }
 }

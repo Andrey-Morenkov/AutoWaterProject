@@ -29,15 +29,29 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.harman.autowaterproject.stuff.MQTTParams;
+import com.harman.autowaterproject.thread.MQTTLoginThread;
+import com.harman.autowaterproject.thread.TcpClient;
+
+import org.eclipse.paho.android.service.MqttAndroidClient;
+import org.eclipse.paho.client.mqttv3.IMqttActionListener;
+import org.eclipse.paho.client.mqttv3.IMqttToken;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static android.Manifest.permission.READ_CONTACTS;
-import static android.provider.AlarmClock.EXTRA_MESSAGE;
 import static android.support.design.widget.Snackbar.make;
 
 /**
@@ -69,13 +83,25 @@ public class LoginActivity extends AppCompatActivity implements Handler.Callback
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private MqttAndroidClient mClient;
+    private MqttConnectOptions mOptions;
+    private String mClientId;
+    private EditText mSSID;
+    private EditText mPASS;
+    private MQTTParams mqttParams;
+    private CheckBox mStandalone;
+    private Button mConfigure;
     private EditText mEditText;
     public Handler handler;
     public boolean isConnect = false;
+    private MQTTLoginThread loginThread;
+    private TcpClient mTCPclient;
     final String LogPrefix = "****AutoWater**** ";
+    final int MqttTag = 12345;
     private LinearLayout linearLayout;
     public final String LOGIN_SUCCESS = "success login";
     public final String LOGIN_FAIL = "unknown user";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -112,8 +138,63 @@ public class LoginActivity extends AppCompatActivity implements Handler.Callback
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
         mEditText = (EditText) findViewById(R.id.email);
+        mConfigure = (Button) findViewById(R.id.buttonConfigure);
+        mSSID = (EditText) findViewById(R.id.editSSID);
+        mPASS = (EditText) findViewById(R.id.editPASS);
+        mStandalone = (CheckBox) findViewById(R.id.checkStandaloneMode);
+        mStandalone.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+        {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b)
+            {
+                if (b)
+                {
+                    mConfigure.setVisibility(View.VISIBLE);
+                    mSSID.setVisibility(View.VISIBLE);
+                    mPASS.setVisibility(View.VISIBLE);
+                }
+                else
+                {
+                    mConfigure.setVisibility(View.INVISIBLE);
+                    mSSID.setVisibility(View.INVISIBLE);
+                    mPASS.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+
+        mConfigure.setOnClickListener(new OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                JSONObject mConfiguration = new JSONObject();
+                try
+                {
+                    mConfiguration.put("WIFI_SSID",mSSID.getText());
+                    mConfiguration.put("WIFI_PASS",mPASS.getText());
+                    Log.d(LogPrefix,mConfiguration.toString());
+                    new ConnectTask().execute(mConfiguration.toString());
+                    mStandalone.setChecked(false);
+                }
+                catch (JSONException j)
+                {
+                    Log.d(LogPrefix,j.getMessage());
+                }
+            }
+        });
+        mConfigure.setVisibility(View.INVISIBLE);
+        mSSID.setVisibility(View.INVISIBLE);
+        mPASS.setVisibility(View.INVISIBLE);
         mEmailView.setText("test@test.com");
+
+        mClientId = MqttClient.generateClientId();
+        mClient = new MqttAndroidClient(this.getApplicationContext(), "tcp://m21.cloudmqtt.com:19348", mClientId);
+        mOptions = new MqttConnectOptions();
+        mOptions.setUserName("pnuxphmq");
+        mOptions.setPassword("74G0GoSMqfDx".toCharArray());
+
         handler = new Handler(this);
+        mqttParams = new MQTTParams(mClient, mOptions, MqttTag, 666, this.handler, LogPrefix, LOGIN_SUCCESS, LOGIN_FAIL);
     }
 
     @Override
@@ -124,16 +205,37 @@ public class LoginActivity extends AppCompatActivity implements Handler.Callback
         showProgress(false);
         if (msg.obj.toString().equals(LOGIN_SUCCESS))
         {
+            showProgress(false);
+            Log.d(LogPrefix,"Success connect to MQTT");
+            loginThread.interrupt();
             Intent intent = new Intent(this, MainActivity.class);
-            String message = mEditText.getText().toString();
-            // Добавляем с помощью свойства putExtra объект - первый параметр - ключ,
-            // второй параметр - значение этого объекта
-            intent.putExtra(EXTRA_MESSAGE, message);
+            try {
+                IMqttToken disconToken = mClient.disconnect();
+                disconToken.setActionCallback(new IMqttActionListener()
+                {
+                    @Override
+                    public void onSuccess(IMqttToken asyncActionToken)
+                    {
+                        // we are now successfully disconnected
+                    }
+
+                    @Override
+                    public void onFailure(IMqttToken asyncActionToken,
+                                          Throwable exception)
+                    {
+                        // something went wrong, but probably we are disconnected anyway
+                    }
+                });
+            } catch (MqttException e) {
+                e.printStackTrace();
+            }
             startActivity(intent);
+            finish();
         }
         else if (msg.obj.toString().equals(LOGIN_FAIL))
         {
-            Snackbar snackbar = Snackbar.make(findViewById(R.id.login_form), "Нет такого пользователя в базе, зарегистрироваться?", Snackbar.LENGTH_INDEFINITE);
+            showProgress(false);
+            Snackbar snackbar = Snackbar.make(findViewById(R.id.login_form), "Нет такого пользователя в базе, зарегистрироваться?", Snackbar.LENGTH_LONG);
             snackbar.show();
         }
         else
@@ -241,18 +343,20 @@ public class LoginActivity extends AppCompatActivity implements Handler.Callback
             // perform the user login attempt.
             showProgress(true);
             mAuthTask = new UserLoginTask(email, password);
-            mAuthTask.execute((Void) null);
+            loginThread = new MQTTLoginThread(mqttParams);
+            loginThread.start();
+            //mAuthTask.execute((Void) null);
         }
     }
 
-    private boolean isEmailValid(String email) {
-        //TODO: Replace this with your own logic
-        return email.contains("@");
+    private boolean isEmailValid(String email)
+    {
+        return (email.contains("@") && (email.contains(".")));
     }
 
-    private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
-        return password.length() > 4;
+    private boolean isPasswordValid(String password)
+    {
+        return password.length() > 6;
     }
 
     /**
@@ -366,16 +470,6 @@ public class LoginActivity extends AppCompatActivity implements Handler.Callback
         {
             // TODO: attempt authentication against a network service.
 
-            try
-            {
-                // Simulate network access.
-                Thread.sleep(5000);
-            }
-            catch (InterruptedException e)
-            {
-                return false;
-            }
-
             for (String credential : DUMMY_CREDENTIALS)
             {
                 String[] pieces = credential.split(":");
@@ -393,14 +487,9 @@ public class LoginActivity extends AppCompatActivity implements Handler.Callback
         protected void onPostExecute(final Boolean success)
         {
             mAuthTask = null;
-            showProgress(false);
 
             if (success)
             {
-                Log.d(LogPrefix,"Sucess background work");
-                Message msg = new Message();
-                msg.obj = LOGIN_FAIL;
-                handler.sendMessage(msg);
                 //finish();
             }
             else
@@ -415,6 +504,40 @@ public class LoginActivity extends AppCompatActivity implements Handler.Callback
         {
             mAuthTask = null;
             showProgress(false);
+        }
+    }
+
+    public class ConnectTask extends AsyncTask<String, String, TcpClient>
+    {
+
+        @Override
+        protected TcpClient doInBackground(String... mymessage)
+        {
+
+            //we create a TCPClient object
+            mTCPclient = new TcpClient(new TcpClient.OnMessageReceived()
+            {
+                @Override
+                //here the messageReceived method is implemented
+                public void messageReceived(String message) {
+                    //this method calls the onProgressUpdate
+                    publishProgress(message);
+                }
+            });
+            mTCPclient.run();
+            Log.d(LogPrefix,mymessage[0]);
+            mTCPclient.sendMessage(mymessage[0]);
+            mTCPclient.stopClient();
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(String... values) {
+            super.onProgressUpdate(values);
+            //response received from server
+            Log.d("test", "response " + values[0]);
+            //process server response here....
+
         }
     }
 }

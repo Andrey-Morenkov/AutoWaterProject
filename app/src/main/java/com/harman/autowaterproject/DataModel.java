@@ -1,27 +1,42 @@
 package com.harman.autowaterproject;
 
-import android.content.Context;
-
-import com.harman.autowaterproject.database.DBworker;
+import android.os.Message;
 
 import java.util.ArrayList;
 
 // Singleton
 
+
+// ТОЛЬКО ЧТЕНИЕ. ИЗМЕНЕНИЕ ЧЕРЕЗ КОНТРОЛЛЕР
+
+
 public class DataModel
 {
     private static DataModel instance = new DataModel();
     private ArrayList<Flower> mFlowerList = null;
-    private DBworker          mDbWorker = null;
+
+    final String LogPrefix = "< DataModel > ";
+    public final int REFRESH_DATA = 777;
+    public final int REFRESH_ADD_ITEM = 778;
+    public final int REFRESH_REMOVE_ITEM = 779;
 
 
     private DataModel()
     {
     }
 
-    private void refresh()
+    private void refreshAddItem()
     {
-        mFlowerList = mDbWorker.getFlowers();
+        //mFlowerList = mDbWorker.getFlowers();
+
+        Message msg = new Message();
+        msg.what = REFRESH_ADD_ITEM;
+        MainActivity.mainHandler.sendMessage(msg);
+    }
+
+    private void refreshRemoveItem()
+    {
+
     }
 
     public static DataModel getInstance()
@@ -29,19 +44,12 @@ public class DataModel
         return instance;
     }
 
-    public void setContext (Context _context)
-    {
-        if (mDbWorker == null)
-        {
-            mDbWorker = new DBworker(_context);
-        }
-    }
-
     public ArrayList<Flower> getFlowerList ()
     {
         if (mFlowerList == null)
         {
             mFlowerList = new ArrayList<>();
+            refreshFlowerList(mFlowerList);
         }
         return mFlowerList;
     }
@@ -53,8 +61,28 @@ public class DataModel
 
     public void addNewFlower (Flower _flower)
     {
-        mDbWorker.addFlower(_flower);
-        refresh();
+        mFlowerList.add(_flower);
+        Message msg = new Message();
+        msg.what = REFRESH_ADD_ITEM;
+        MainActivity.mainHandler.sendMessage(msg);
+    }
+
+    public void removeFlower (Flower _flower)
+    {
+
+    }
+
+    public void refreshFlowerList(ArrayList<Flower> newFLowerList)
+    {
+        mFlowerList = newFLowerList;
+        Message msg = new Message();
+        msg.what = REFRESH_DATA;
+        MainActivity.mainHandler.sendMessage(msg);
+    }
+
+    public Flower getFlower (int position)
+    {
+        return mFlowerList.get(position);
     }
 
 

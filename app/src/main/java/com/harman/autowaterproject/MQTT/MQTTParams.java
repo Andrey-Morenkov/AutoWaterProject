@@ -1,4 +1,4 @@
-package com.harman.autowaterproject.stuff;
+package com.harman.autowaterproject.MQTT;
 
 import android.os.Handler;
 

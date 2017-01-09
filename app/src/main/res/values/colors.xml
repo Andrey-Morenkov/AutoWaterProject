@@ -2,9 +2,14 @@
 <resources>
     <color name="colorPrimary">#009688</color>
     <color name="colorPrimaryDark">#00796B</color>
+    <color name="colorPrimaryLight">#B2DFDB</color>
     <color name="colorAccent">#ff4081</color>
     <color name="colorLoginAccent">#ffffff</color>
     <color name="colorBlack">#191919</color>
     <color name="colorBackgroundMain">#EEEEEE</color>
     <color name="colorWhite">#ffffff</color>
+    <color name="colorPrimaryText">#212121</color>
+    <color name="colorSecondaryText">#757575</color>
+    <color name="colorIcons">#FFFFFF</color>
+    <color name="colorDivider">#BDBDBD</color>
 </resources>

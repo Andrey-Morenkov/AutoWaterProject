@@ -35,7 +35,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.harman.autowaterproject.stuff.MQTTParams;
+import com.harman.autowaterproject.MQTT.MQTTParams;
 import com.harman.autowaterproject.thread.MQTTLoginThread;
 import com.harman.autowaterproject.thread.TcpClient;
 
@@ -216,6 +216,7 @@ public class LoginActivity extends AppCompatActivity implements Handler.Callback
                     @Override
                     public void onSuccess(IMqttToken asyncActionToken)
                     {
+                        Log.d(LogPrefix, "Successful disconnect to MQTT");
                         // we are now successfully disconnected
                     }
 

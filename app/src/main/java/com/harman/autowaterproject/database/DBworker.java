@@ -85,7 +85,8 @@ public class DBworker
 
             do
             {
-                Flower dbflower = new Flower(cursor.getString(nameColInd),
+                Flower dbflower = new Flower(cursor.getInt(idColInd),
+                                            cursor.getString(nameColInd),
                                             cursor.getInt(valveColInd),
                                             cursor.getInt(hygrometerColInd),
                                             cursor.getInt(critWetnessColInd),

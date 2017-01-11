@@ -101,7 +101,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="textPersonName"
-        android:text="SSID"
+        android:text="Pumba"
         android:ems="10"
         android:id="@+id/editSSID"
         android:visibility="visible"/>
@@ -110,7 +110,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="textPersonName"
-        android:text="PASS"
+        android:text="-5Ctreyl"
         android:ems="10"
         android:id="@+id/editPASS"
         android:singleLine="true"/>

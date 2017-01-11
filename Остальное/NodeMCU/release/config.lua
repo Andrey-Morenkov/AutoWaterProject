@@ -22,7 +22,7 @@ WIFI_WAIT = 20
 -- Pin Declarations
 LED_ON = 1
 LED_OFF = 0
-uart.alt(0)
+--uart.alt(0)
 -- default uart is 115 200
 
 -- MQTT

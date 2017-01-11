@@ -18,6 +18,7 @@ public class DataModel
     final String LogPrefix = "< DataModel > ";
     public final int REFRESH_DATA = 777;
     public final int REFRESH_ADD_ITEM = 778;
+    public final int REFRESH_UPDATE_ITEM = 776;
     public final int REFRESH_REMOVE_ITEM = 779;
 
 
@@ -84,6 +85,37 @@ public class DataModel
     {
         return mFlowerList.get(position);
     }
+
+    public void updateFlower (int position, Flower _flower)
+    {
+        mFlowerList.set(position, _flower);
+        Message msg = new Message();
+        msg.what = REFRESH_UPDATE_ITEM;
+        msg.arg1 = position;
+        MainActivity.mainHandler.sendMessage(msg);
+    }
+
+    public void updateFlower (int position, String type, int value)
+    {
+        switch (type)
+        {
+            case "w" :
+            {
+                mFlowerList.get(position).setWetness(value);
+                Message msg = new Message();
+                msg.what = REFRESH_UPDATE_ITEM;
+                msg.arg1 = position;
+                MainActivity.mainHandler.sendMessage(msg);
+                break;
+            }
+        }
+        mFlowerList.get(position).setWetness(value);
+        Message msg = new Message();
+        msg.what = REFRESH_UPDATE_ITEM;
+        msg.arg1 = position;
+        MainActivity.mainHandler.sendMessage(msg);
+    }
+
 
 
 

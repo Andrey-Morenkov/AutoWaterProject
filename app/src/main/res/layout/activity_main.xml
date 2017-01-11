@@ -9,6 +9,19 @@
     android:layout_height="match_parent">
 
     <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fabRemoveAll"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_margin="@dimen/fab_margin"
+        app:elevation="4dp"
+        app:fabSize="normal"
+        android:clickable="true"
+        app:srcCompat="@mipmap/delete_forever"
+        android:tint="@color/colorWhite"
+        app:backgroundTint="@color/colorAccent"/>
+
+    <android.support.design.widget.FloatingActionButton
         android:id="@+id/fabAddNewFlower"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -21,66 +34,76 @@
         android:tint="@color/colorWhite"
         app:backgroundTint="@color/colorAccent"/>
 
-    <RelativeLayout
+    <LinearLayout
         android:orientation="vertical"
         android:id="@+id/activity_main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context="com.harman.autowaterproject.MainActivity">
 
-        <TextView
-            android:text="Нет сохраненных цветков"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/emptyViewText"
-            android:textStyle="bold"
-            android:textSize="20sp"
-            android:visibility="gone"
-            android:layout_centerInParent="true"
-            android:textColor="@android:color/darker_gray"/>
-
-        <android.support.v7.widget.Toolbar
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?attr/colorPrimary"
-            app:title="AutoWater Project"
-            app:titleTextColor="@color/colorWhite"
-            android:theme="?attr/actionBarTheme"
-            android:minHeight="?attr/actionBarSize"
-            android:id="@+id/mainToolbar"/>
+            android:layout_height="wrap_content">
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/recycler_view"
-            android:orientation="vertical"
+            <android.support.v7.widget.Toolbar
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?attr/colorPrimary"
+                app:title="AutoWater Project"
+                app:titleTextColor="@color/colorWhite"
+                android:theme="?attr/actionBarTheme"
+                android:minHeight="?attr/actionBarSize"
+                android:id="@+id/mainToolbar"/>
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@mipmap/cloud_sync"
+                android:id="@+id/imageCloudConnect"
+                android:layout_marginEnd="17dp"
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"/>
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@mipmap/lan_pending"
+                android:layout_centerVertical="true"
+                android:layout_toStartOf="@+id/imageCloudConnect"
+                android:layout_marginEnd="16dp"
+                android:id="@+id/imageArduinoConnect"/>
+
+        </RelativeLayout>
+
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/colorBackgroundMain"
-            android:layout_alignParentStart="true"
-            android:layout_below="@+id/mainToolbar">
+            android:layout_height="match_parent">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/recycler_view"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/colorBackgroundMain"
+                android:layout_below="@+id/mainToolbar"
+                android:layout_alignParentStart="true">
 
 
-        </android.support.v7.widget.RecyclerView>
+            </android.support.v7.widget.RecyclerView>
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:srcCompat="@mipmap/lan_pending"
-            android:layout_marginEnd="11dp"
-            android:id="@+id/imageView2"
-            android:layout_alignTop="@+id/imageView"
-            android:layout_alignParentEnd="true"/>
+            <TextView
+                android:text="Нет сохраненных цветков"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/emptyViewText"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:visibility="gone"
+                android:layout_centerInParent="true"
+                android:textColor="@android:color/darker_gray"/>
+        </RelativeLayout>
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:srcCompat="@mipmap/cloud_sync"
-            android:id="@+id/imageView"
-            android:layout_marginEnd="10dp"
-            android:layout_marginBottom="15dp"
-            android:layout_above="@+id/recycler_view"
-            android:layout_toStartOf="@+id/imageView2"/>
-
-    </RelativeLayout>
+    </LinearLayout>
 
 
 </android.support.design.widget.CoordinatorLayout>

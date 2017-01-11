@@ -6,13 +6,20 @@ mqtt:on("offline", function(con) print ("offline") end)
 
 -- on receive message
 mqtt:on("message", function(conn, topic, data)
-  print(topic .. ":" )
+  --print(topic .. ":" )
   if data ~= nil then
-      print(data)
+      --print(data)
       
       local t = cjson.decode(data)            
       if (t.Target == "arduino") then
-          uart.write(0, t.Command)
+          
+          gpio.write(8, gpio.LOW)
+          gpio.write(0, gpio.LOW)      
+          tmr.delay(1000)
+          gpio.write(0, gpio.HIGH)
+          gpio.write(8, gpio.HIGH)
+          
+          uart.write(0, t.Command .. "\n")
       end
    
       if(t.Target == "nodemcu") then
@@ -24,9 +31,8 @@ mqtt:on("message", function(conn, topic, data)
               -- тут для сложных команд в nodemcu
           end          
       end    
-  
+      dofile ("SingleBlink.lua")
   else
-      mqtt:publish("toPhone", "Unknown command", 0, 0)
       -- inform MQTT broker that something went wrong
       -- print error to console
       --mqtt:publish("status", "--> Error: Unknown Command", 0, 0,
@@ -38,6 +44,8 @@ mqtt:connect("m21.cloudmqtt.com", 19348, 0, function(conn)
   -- subscribe topic with qos = 0
   mqtt:subscribe("toController",0)
   print("CloudMQTT connected")
-  dofile("StationBlink.lua")
 end)
+
+dofile("UART.lua")
+dofile("StationBlink.lua")
 

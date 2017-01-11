@@ -14,6 +14,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.harman.autowaterproject.Controller;
 import com.harman.autowaterproject.DataModel;
 import com.harman.autowaterproject.Flower;
 import com.harman.autowaterproject.R;
@@ -57,12 +58,19 @@ public class FlowersListAdapter extends RecyclerView.Adapter<FlowersListAdapter.
         notifyItemInserted(data.size()-1);
     }
 
+    public void refreshUpdateItem (int position)
+    {
+        data = DataModel.getInstance().getFlowerList();
+        notifyItemChanged(position);
+    }
+
     @Override
     public void onBindViewHolder(final FlowerViewHolder holder, final int position)
     {
         holder.cardFlowerId = data.get(position).getId();
         holder.cardTitle.setText(data.get(position).getName());
         holder.cardTextWetnessAlert.setText(String.valueOf(data.get(position).getCritical_wetness()));
+        holder.cardTextWetness.setText(String.valueOf(data.get(position).getWetness()));
 
         holder.cardButtonWater.setOnClickListener(new View.OnClickListener()
         {
@@ -71,6 +79,15 @@ public class FlowersListAdapter extends RecyclerView.Adapter<FlowersListAdapter.
             {
                 Log.d(LogPrefix, "Pressed WaterButton at position " + position);
 
+            }
+        });
+
+        holder.cardButtonRefresh.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                Controller.getInstance().checkFlower(data.get(position).getId());
             }
         });
     }

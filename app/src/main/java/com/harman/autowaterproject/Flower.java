@@ -7,6 +7,7 @@ package com.harman.autowaterproject;
 public class Flower
 {
     private int    id;                      // номер
+    private int    wetness;                 // текущая влажность
     private String name;                    // название
     private int    valve_pin;               // пин клапана
     private int    hygrometer_pin;          // пин гигрометра
@@ -17,6 +18,7 @@ public class Flower
     public Flower()
     {
         id = -1;
+        wetness = -1;
         name = "EmptyFlower";
         valve_pin = -1;
         hygrometer_pin = -1;
@@ -44,6 +46,7 @@ public class Flower
         this.critical_wetness = critical_wetness;
         this.critical_temperature = critical_temperature;
         this.critical_luminosity = critical_luminosity;
+        this.wetness = -1;
     }
 
     public Flower(int _id, String name, int valve_pin, int hygrometer_pin, int critical_wetness, int critical_temperature, int critical_luminosity)
@@ -55,6 +58,7 @@ public class Flower
         this.critical_wetness = critical_wetness;
         this.critical_temperature = critical_temperature;
         this.critical_luminosity = critical_luminosity;
+        this.wetness = -1;
     }
 
     public String getName()
@@ -80,6 +84,14 @@ public class Flower
     public int getCritical_temperature()
     {
         return critical_temperature;
+    }
+
+    public int getWetness() {
+        return wetness;
+    }
+
+    public void setWetness(int wetness) {
+        this.wetness = wetness;
     }
 
     public void setName(String name)

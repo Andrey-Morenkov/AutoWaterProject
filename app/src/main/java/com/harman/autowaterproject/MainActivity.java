@@ -13,13 +13,15 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.harman.autowaterproject.adapter.FlowersListAdapter;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import jp.wasabeef.recyclerview.animators.LandingAnimator;
 
@@ -32,6 +34,7 @@ public class MainActivity extends AppCompatActivity implements Handler.Callback
     private Toolbar mToolbar;
 
     private FloatingActionButton mFabAddNewFlower;
+    private FloatingActionButton mFabRemoveAll;
 
     public static Handler mainHandler;
 
@@ -43,16 +46,19 @@ public class MainActivity extends AppCompatActivity implements Handler.Callback
     final int THREAD_QUIT        = 999;
     public final int MQTT_CONNECTION_LOST = 990;
 
+    public final int REFRESH_UPDATE_ITEM = 776;
     public final int REFRESH_DATA = 777;
     public final int REFRESH_ADD_ITEM = 778;
     public final int REFRESH_REMOVE_ITEM = 779;
+    public final int MQTT_CONNECTION_SUCCESS = 991;
+    public final int ARDUINO_CONNECTION_SUCCESS = 556;
 
     public final int ADD_NEW_FLOWER = 888;
 
 
     public MqttAndroidClient client;
-    public MqttConnectOptions options;
-    public String clientId;
+    private ImageView mCloudImage;
+    private ImageView mArduinoImage;
 
     final String LogPrefix = "****AutoWater**** ";
 
@@ -65,6 +71,10 @@ public class MainActivity extends AppCompatActivity implements Handler.Callback
         setContentView(R.layout.activity_main);
         mToolbar = (Toolbar) findViewById(R.id.mainToolbar);
         setSupportActionBar(mToolbar);
+
+        mCloudImage = (ImageView) findViewById(R.id.imageCloudConnect);
+        mArduinoImage = (ImageView) findViewById(R.id.imageArduinoConnect);
+
         mFabAddNewFlower = (FloatingActionButton) findViewById(R.id.fabAddNewFlower);
         mFabAddNewFlower.setOnClickListener(new View.OnClickListener()
         {
@@ -110,16 +120,29 @@ public class MainActivity extends AppCompatActivity implements Handler.Callback
             }
         });
 
+        mFabRemoveAll = (FloatingActionButton) findViewById(R.id.fabRemoveAll);
+        mFabRemoveAll.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                Controller.getInstance().deleteAll();
+            }
+
+        });
+
         mainHandler = new Handler(this);
 
         DataModel.getInstance();
-        Controller.getInstance().init(this.getApplicationContext());
+        client = new MqttAndroidClient(getApplicationContext(), "tcp://m21.cloudmqtt.com:19348", MqttClient.generateClientId(), new MemoryPersistence());
+        Controller.getInstance().init(client);
 
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         mLayoutManager = new LinearLayoutManager(getBaseContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setItemAnimator(new LandingAnimator());
         mRecyclerView.getItemAnimator().setAddDuration(500);
+        mRecyclerView.getItemAnimator().setChangeDuration(400);
         mRecyclerView.getItemAnimator().setRemoveDuration(200);
 
         mAdapter = new FlowersListAdapter(DataModel.getInstance().getFlowerList());
@@ -146,9 +169,22 @@ public class MainActivity extends AppCompatActivity implements Handler.Callback
         Log.d(LogPrefix,"<Main Handler> Incoming message " + msg.what);
         switch (msg.what)
         {
-            case MQTT_ACTION :
+            case  MQTT_CONNECTION_SUCCESS:
             {
+                mCloudImage.setImageResource(R.mipmap.cloud_check);
+                break;
+            }
 
+            case  ARDUINO_CONNECTION_SUCCESS:
+            {
+                mArduinoImage.setImageResource(R.mipmap.lan_connect);
+                break;
+            }
+
+            case MQTT_CONNECTION_LOST :
+            {
+                mCloudImage.setImageResource(R.mipmap.cloud_sync);
+                break;
             }
 
             case ADD_NEW_FLOWER :
@@ -164,12 +200,25 @@ public class MainActivity extends AppCompatActivity implements Handler.Callback
                     mRecyclerView.setVisibility(View.GONE);
                     mEmptyViewText.setVisibility(View.VISIBLE);
                 }
+                else
+                {
+                    mRecyclerView.setVisibility(View.VISIBLE);
+                    mEmptyViewText.setVisibility(View.GONE);
+                }
                 break;
             }
 
             case REFRESH_ADD_ITEM :
             {
                 mAdapter.refreshAddItem();
+                mRecyclerView.setVisibility(View.VISIBLE);
+                mEmptyViewText.setVisibility(View.GONE);
+                break;
+            }
+
+            case REFRESH_UPDATE_ITEM :
+            {
+                mAdapter.refreshUpdateItem(msg.arg1);
                 break;
             }
         }
@@ -181,7 +230,6 @@ public class MainActivity extends AppCompatActivity implements Handler.Callback
     {
         Log.d(LogPrefix, "< onResume main >");
         super.onResume();
-
     }
 
     @Override

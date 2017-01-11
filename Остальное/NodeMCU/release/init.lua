@@ -10,5 +10,8 @@ elseif reset_reason == 6 then
     file.remove("WifiConfig.lua")
 end
 
+uart.on("data")
+gpio.write(8, gpio.HIGH)
+
 dofile("config.lua")
 dofile("StationMode.lua")
